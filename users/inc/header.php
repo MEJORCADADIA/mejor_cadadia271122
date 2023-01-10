@@ -3,6 +3,7 @@ ob_start();
 $filepath = realpath(dirname(__FILE__));
 include_once($filepath . '/../../lib/Database.php');
 include_once($filepath . '/../../lib/Session.php');
+include_once($filepath . '/../../lib/RememberCookie.php');
 include_once($filepath . '/../../helper/Format.php');
 include_once($filepath . '/../../classes/Common.php');
 
@@ -11,18 +12,30 @@ $db = new Database();
 $fm = new Format();
 $common = new Common();
 
-if (Session::get('user_id') !== NULL) {
-    $user_id = Session::get('user_id');
-    $user_info = $common->select("`users`", "`id` = '$user_id'");
-    if ($user_info) {
-        $user_infos = mysqli_fetch_assoc($user_info);
-    }
+$user_infos = null;
+$rememberCookieData = RememberCookie::getRememberCookieData();
+if ($rememberCookieData) {
+    $user_infos = $common->first(
+            "`users`",
+            "`id` = :id AND password = :password AND remember_token = :remember_token",
+            ['id' => $rememberCookieData[RememberCookie::ID], 'remember_token' => $rememberCookieData[RememberCookie::REMEMBER_TOKEN], 'password' => $rememberCookieData[RememberCookie::PASSWORD]]
+    );
 }
 
-Session::checkSession();
+if ($user_infos === null && Session::get('user_id') !== NULL) {
+    $user_id = Session::get('user_id');
+    $user_infos = $common->first("`users`", "`id` = :id", ['id' => $user_id]);
+}
+
+if (! Session::checkSession() && $user_infos === null) {
+    header("Location: " . SITE_URL);
+    return;
+}
+
 if (isset($_GET['logout'])) {
     Session::destroy();
 }
+
 $current_file_name = basename($_SERVER['SCRIPT_FILENAME']);
 $goalType = '';
 if ($current_file_name == 'supergoals.php') {
@@ -51,6 +64,7 @@ $profile_info = $common
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css'>
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v14.0&appId=1108588056758284&autoLogAppEvents=1" nonce="JQBAhE2Y"></script>
     <link rel="stylesheet" href="<?= SITE_URL; ?>/users/assets/bootstrap-datepicker.min.css">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css'>
 
     <link rel="stylesheet" href="./assets/style.css">
     <script>
@@ -485,16 +499,14 @@ $profile_info = $common
                         <a class="nav-link active" aria-current="page" href="<?= SITE_URL; ?>">Home</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link" href="#" role="button">
-                            MCD-JOURNAL
-                        </a>
+                        <a class="nav-link" href="#" role="button">MejorJournal</a>
                         <ul class="submenu">
                             <li class="nav-item">
                                 <a class="nav-link" href="cronovida.php" role="button">
-                                    Cronovida
+                                    CronoVida
                                 </a>
                             </li>
-                            <li class="nav-item"><a class="nav-link" href="dailygoals.php" role="button">Victory-7 </a> </li>
+                            <li class="nav-item"><a class="nav-link" href="dailygoals.php" role="button">Victoria7</a> </li>
 
                             <li class="nav-item">
                                 <a class="nav-link" href="dailycommitments.php" role="button">
@@ -518,7 +530,7 @@ $profile_info = $common
 
                             <li class="nav-item">
                                 <a class="nav-link dropdown-toggle" href="#dentletter" id="navbarDropdown" role="button" data-bs-toggle="collapse" aria-expanded="false">
-                                    Cartas Eternidad
+                                    Cartas para la Eternidad
                                 </a>
                                 <ul id="dentletter" class="list-unstyled fw-normal pb-1 small collapse hide" aria-labelledby="navbarDropdown" style="margin-left:1rem;">
                                     <li class="nav-item"><a class="nav-link<?= $path == 'index.php' ? ' active' : ''; ?>" href="https://mejorcadadia.com/users/index.php" id="navbarDropdown">Tablero</a></li>
@@ -528,7 +540,7 @@ $profile_info = $common
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="https://blog.mejorcadadia.com">MCD BLOG</a>
+                        <a class="nav-link" href="https://blog.mejorcadadia.com">MejorBlog</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= SITE_URL; ?>/users/profile.php">Perfil</a>
@@ -555,16 +567,14 @@ $profile_info = $common
                                 <a class="nav-link active" aria-current="page" href="<?= SITE_URL; ?>">Home</a>
                             </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link" href="#" role="button">
-                                    MCD-JOURNAL
-                                </a>
+                                <a class="nav-link" href="#" role="button">MejorJournal</a>
                                 <ul class="submenu">
                                     <li class="nav-item">
                                         <a class="nav-link" href="cronovida.php" role="button">
-                                            Cronovida
+                                            CronoVida
                                         </a>
                                     </li>
-                                    <li class="nav-item"><a class="nav-link" href="dailygoals.php" role="button">Victory-7 </a> </li>
+                                    <li class="nav-item"><a class="nav-link" href="dailygoals.php" role="button">Victoria7</a> </li>
 
                                     <li class="nav-item">
                                         <a class="nav-link" href="dailycommitments.php" role="button">
@@ -588,17 +598,17 @@ $profile_info = $common
 
                                     <li class="nav-item">
                                         <a class="nav-link dropdown-toggle" href="#dentletter" id="navbarDropdown" role="button" data-bs-toggle="collapse" aria-expanded="false">
-                                            Cartas Eternidad
+                                            Cartas para la Eternidad
                                         </a>
                                         <ul id="dentletter" class="list-unstyled fw-normal pb-1 small collapse hide" aria-labelledby="navbarDropdown" style="margin-left:1rem;">
-                                            <li class="nav-item"><a class="nav-link <?= $path == 'index.php' ? ' active' : ''; ?>" href="https://mejorcadadia.com/users/index.php" id="navbarDropdown">Tablero</a></li>
-                                            <li class="nav-item"><a class="nav-link" href="https://mejorcadadia.com/users/notebook.php">Escribe Carta</a></li>
+                                            <li class="nav-item"><a class="nav-link <?= $path == 'index.php' ? ' active' : ''; ?>" href="<?= SITE_URL; ?>/users/index.php" id="navbarDropdown">Tablero</a></li>
+                                            <li class="nav-item"><a class="nav-link" href="<?= SITE_URL; ?>/users/notebook.php">Escribe Carta</a></li>
                                         </ul>
                                     </li>
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="https://blog.mejorcadadia.com">MCD BLOG</a>
+                                <a class="nav-link" href="https://blog.mejorcadadia.com">MejorBlog</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="<?= SITE_URL; ?>/users/profile.php">Perfil</a>

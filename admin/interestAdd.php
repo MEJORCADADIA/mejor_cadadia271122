@@ -4,14 +4,14 @@
 if (isset($_POST['add_interest']) && isset($_POST['interest']) && !empty($_POST['interest'])) {
     $interest = $fm->validation($_POST['interest']);
     try {
-        $existingInterest = $common->select('interests', "interest='$interest'");
+        $existingInterest = $common->first('interests', "interest=:interest", ['interest' => $interest]);
         if ($existingInterest) {
             Session::set('error', $interest . ' already exists.');
             header("Location: " . SITE_URL . "/admin/interests.php");
             return;
         }
 
-        $data = $common->insert('interests (interest)', "('$interest')");
+        $data = $common->insert('interests', ['interest' => $interest]);
 
         if ($data) {
             Session::set('success', 'Interest added successfully!');

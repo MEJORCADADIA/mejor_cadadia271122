@@ -2,19 +2,19 @@
 <?php
 if(isset($_GET['block'])) {
   $block_id = $_GET['block'];
-  $block_update = $common->update("`users`", "`status` = '0'", "`id` = '$block_id'");
+  $block_update = $common->update(table: "users", data: ["status" => '0'], cond: "id = :id", params: ['id' => $block_id], modifiedColumnName: 'updated_at');
   if($block_update) {
     header("Location: ".SITE_URL."/admin/index.php");
   }
 } elseif(isset($_GET['unblock'])) {
   $unblock_id = $_GET['unblock'];
-  $unblock_update = $common->update("`users`", "`status` = '1'", "`id` = '$unblock_id'");
+  $unblock_update = $common->update(table: "users", data: ["status" => '1'], cond: "id = :id", params: ['id' =>$unblock_id], modifiedColumnName: 'updated_at');
   if($unblock_update) {
     header("Location: ".SITE_URL."/admin/index.php");
   }
 } elseif(isset($_GET['delete'])) {
   $delete_id = $_GET['delete'];
-  $user_delete = $common->delete("`users`", "`id` = '$delete_id'");
+  $user_delete = $common->delete("users", "id = :id", ['id' => $delete_id]);
   if($user_delete) {
     header("Location: ".SITE_URL."/admin/index.php");
   }
@@ -160,7 +160,7 @@ if(isset($_GET['block'])) {
                   var Title = $('#Title').val();
                   var LetterApplication = tinyMCE.get('LetterApplication').getContent();
                   $.ajax({
-                    url: "https://mejorcadadia.com/admin/ajax/ajax.php",
+                    url: "<?= SITE_URL ?>/admin/ajax/ajax.php",
                     type: "POST",
                     data: {
                       EmailSendCheck: 'EmailSendCheck',
@@ -291,7 +291,7 @@ if(isset($_GET['block'])) {
                   var Title = $('#Title').val();
                   var LetterApplication = tinyMCE.get('LetterApplication').getContent();
                   $.ajax({
-                    url: "https://mejorcadadia.com/admin/ajax/ajax.php",
+                    url: "<?= SITE_URL ?>/admin/ajax/ajax.php",
                     type: "POST",
                     data: {
                       EmailSendCheckOnlySend: 'EmailSendCheckOnlySend',

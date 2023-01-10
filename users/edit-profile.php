@@ -17,25 +17,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
 
     $interestsToAdd = $_POST['interests'];
     if ($interestsToAdd === null || count($interestsToAdd) === 0) {
-        $common->delete('interest_user', "user_id={$user_infos['id']}");
+        $common->delete('interest_user', "user_id = :user_id", ['user_id' => $user_infos['id']]);
     } else {
-        $interestString = implode(',', $interestsToAdd);
-        $db->delete("delete from interest_user where user_id = {$user_infos['id']} and interest_id not in (" . $interestString . ")");
-        $existingInterests = $common->selectcolumn('interest_id', 'interest_user', "user_id={$user_infos['id']}");
-        $existingInterests = $db->get($existingInterests);
+        $placeholder = array_fill(0, count($interestsToAdd), '?');
+        $common->delete("interest_user", "user_id = ? AND interest_id not in (" . implode(',', $placeholder) . ")", [$user_infos['id'], ...$interestsToAdd]);
+        $existingInterests = $common->get('interest_user', "user_id = :user_id", ['user_id' => $user_infos['id']], ['interest_id']);
         $hashMap = [];
         foreach ($existingInterests as $existingInterest) {
             $hashMap[$existingInterest['interest_id']] = true;
         }
         $queryData = "";
+        $data = [];
         foreach ($interestsToAdd as $key => $value) {
             if (!isset($hashMap[$value])) {
                 $queryData .= ($queryData !== '' ? ',' : '');
-                $queryData .= "({$value},{$user_infos['id']})";
+                $queryData .= "(?,?)";
+                $data[] = $value;
+                $data[] = $user_infos['id'];
             }
         }
         if ($queryData !== '') {
-            $db->insert("insert into interest_user (interest_id, user_id) values $queryData");
+            $db->query("insert into interest_user (interest_id, user_id) values {$queryData}", $data);
         }
     }
 
@@ -43,7 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
 
     if ($file_name) {
         $image_name = 'https://mejorcadadia.com/uploads/users/' . $image;
-        $result = $common->update("`users`", "`full_name` = '$full_name', `description` = '$description', `image` = '$image_name', answers = '$answers'", "`id` = '$user_id'");
+        $result = $common->update(
+                table: "users",
+                data: ["full_name" => $full_name, 'description' => $description, 'image' => $image_name, 'answers' => $answers],
+                cond: "id = :id",
+                params: ['id' => $user_infos['id']],
+                modifiedColumnName: 'updated_at'
+        );
         if ($result) {
             move_uploaded_file($file_tmp, 'uploads/users/' . $image);
             header("Location: " . SITE_URL . "/users/profile.php");
@@ -52,7 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
             $update_msg = '<div class="alert alert-success mb-0">Something is wrong!</div>';
         }
     } else {
-        $result = $common->update("`users`", "`full_name` = '$full_name', `description` = '$description', answers='$answers'", "`id` = '$user_id'");
+        $result = $common->update(
+                table: "users",
+                data: ['full_name' => $full_name, 'description' => $description, 'answers' => $answers],
+                cond: "id = :id",
+                params: ['id' => $user_infos['id']],
+                modifiedColumnName: 'updated_at'
+        );
         if ($result) {
             header("Location: " . SITE_URL . "/users/profile.php");
             $update_msg = '<div class="alert alert-success mb-0">Profile updated successfully.</div>';
@@ -62,11 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
     }
 }
 
-$interests = $common->select('interests');
-$interests = $db->get($interests);
+$interests = $common->get('interests');
 
-$userInterests = $common->select('interest_user', "user_id={$user_infos['id']}");
-$userInterests = $db->get($userInterests);
+$userInterests = $common->get('interest_user', "user_id = :user_id", ['user_id' => $user_infos['id']]);
+
 $userInterestsHashMap = [];
 if ($userInterests) {
     foreach ($userInterests as $userInterest) {

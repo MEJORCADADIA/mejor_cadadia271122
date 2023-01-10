@@ -3,6 +3,7 @@ ob_start();
 $filepath = realpath(dirname(__FILE__));
 include_once($filepath . '/../lib/Database.php');
 include_once($filepath . '/../lib/Session.php');
+include_once($filepath . '/../lib/RememberCookie.php');
 include_once($filepath . '/../helper/Format.php');
 include_once($filepath . '/../classes/Common.php');
 
@@ -11,12 +12,19 @@ $db = new Database();
 $fm = new Format();
 $common = new Common();
 
-if (Session::get('user_id') !== NULL) {
+$user_infos = null;
+$rememberCookieData = RememberCookie::getRememberCookieData();
+if ($rememberCookieData) {
+    $user_infos = $common->first(
+        "`users`",
+        "`id` = :id AND password = :password AND remember_token = :remember_token",
+        ['id' => $rememberCookieData[RememberCookie::ID], 'remember_token' => $rememberCookieData[RememberCookie::REMEMBER_TOKEN], 'password' => $rememberCookieData[RememberCookie::PASSWORD]]
+    );
+}
+
+if ($user_infos === null && Session::get('user_id') !== NULL) {
     $user_id = Session::get('user_id');
-    $user_info = $common->select("`users`", "`id` = '$user_id'");
-    if ($user_info) {
-        $user_infos = mysqli_fetch_assoc($user_info);
-    }
+    $user_infos = $common->first("users", "id = :id", ['id' => $user_id]);
 }
 
 $profile_info = $common

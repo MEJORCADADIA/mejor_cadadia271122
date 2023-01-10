@@ -1,12 +1,11 @@
 <?php require_once "inc/header.php"; ?>
 
 <?php
-$inspirations = $db->select('select * from daily_inspirations');
-$inspirations = $db->get($inspirations);
+$inspirations = $common->get('daily_inspirations');
 
 if (isset($_POST['interest_delete'])) {
     $id = $fm->validation($_POST['id']);
-    $common->delete('daily_inspirations', "id=$id");
+    $common->delete('daily_inspirations', "id = :id", ['id' => $id]);
     Session::set('success', 'Inspiration deleted successfully');
     header("Location: " . SITE_URL . "/admin/inspiration.php");
     return;

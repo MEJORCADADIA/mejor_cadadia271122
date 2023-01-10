@@ -9,13 +9,7 @@
 
 $letterapp=[];
 if(!empty($letterid)){
- 
-  $result = $common->select("`letterapplication`", "id='".$letterid."'");
-
-  if($result){
-    $letterapp = mysqli_fetch_assoc($result);
- 
-  }
+    $letterapp = $common->first("`letterapplication`", "id = :id", ['id' => $letterid]);
 }
 
 ?>

@@ -4,13 +4,11 @@ include_once ($filepath . '/../lib/Database.php');
 include_once ($filepath . '/../classes/Common.php');
 
 $common = new Common();
-$db = new Database();
 
 function getInspirationQuote()
 {
-    global $common, $db;
+    global $common;
     $date = date('Y-m-d', time());
-    $inspirationQuote = $common->select('daily_inspirations', "date='$date'");
-    $inspirationQuote = $db->first($inspirationQuote);
+    $inspirationQuote = $common->first('daily_inspirations', 'date = :date', ['date' => $date], ['inspiration_quote']);
     return $inspirationQuote['inspiration_quote'] ?? '';
 }

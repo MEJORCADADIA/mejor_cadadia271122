@@ -3,8 +3,7 @@
 <?php
 if (!empty($_GET['id'])) {
     $urlId = $fm->validation($_GET['id']);
-    $inspirationQuote = $common->select('daily_inspirations', "id=$urlId");
-    $inspirationQuote = $db->first($inspirationQuote);
+    $inspirationQuote = $common->first('daily_inspirations', "id=:urlId", ['urlId' => $urlId]);
 }
 
 if (isset($_POST['inspiration_quote_submit'])) {
@@ -31,25 +30,23 @@ if (isset($_POST['inspiration_quote_submit'])) {
             return;
         }
 
-        if ($id === null || empty($id)) {
-            $dateCheck = $common->select('daily_inspirations', "date='$date'");
-            $dateCheck = $db->first($dateCheck);
+        if (empty($id)) {
+            $dateCheck = $common->first('daily_inspirations', "date = :date", ['date' => $date]);
             if ($dateCheck) {
                 Session::set('error', 'There is already an inspiration quote on this date');
                 header("Location: " . SITE_URL . "/admin/inspirationForm.php");
                 return;
             }
-            $data = $common->insert('daily_inspirations (inspiration_quote, date)', "('$inspirationQuote', '$date')");
+            $data = $common->insert('daily_inspirations',  ['inspiration_quote' => $inspirationQuote, 'date' => $date]);
             Session::set('success', 'Inspiration added successfully!');
         } else {
-            $dateCheck = $common->select('daily_inspirations', "date='$date' and id != $id");
-            $dateCheck = $db->first($dateCheck);
+            $dateCheck = $common->first('daily_inspirations', "date = :date and id != :id", ['date' => $date, 'id' => $id]);
             if ($dateCheck) {
                 Session::set('error', 'There is already an inspiration quote on this date');
                 header("Location: " . SITE_URL . "/admin/inspirationForm.php?id=$id");
                 return;
             }
-            $data = $common->update('daily_inspirations', "inspiration_quote='$inspirationQuote', date='$date', updated_at='" . date('Y-m-d H:i:s') . "'", "id=$id");
+            $data = $common->update('daily_inspirations', ['inspiration_quote' => $inspirationQuote, 'date' => $date], "id = :id", ['id' => $id]);
             Session::set('success', 'Inspiration updated successfully!');
         }
     } catch (Exception $e) {
@@ -61,19 +58,18 @@ if (isset($_POST['inspiration_quote_submit'])) {
 }
 ?>
 
-<style>
-    .tox-notifications-container {
-        display: none !important;
-    }
-
-    .letter {
-        float: right;
-        margin: 15px 10px 15px 10px;
-    }
-</style>
-<script src="<?= SITE_URL ?>/admin/assets/jquery-3.6.0.min.js"></script>
-<script src="<?= SITE_URL ?>/admin/assets/tinymce.min.js" referrerpolicy="origin"></script>
-<script src="<?= SITE_URL ?>/admin/assets/tinymce-jquery.min.js"></script>
+    <style>
+        .tox-notifications-container {
+            display: none !important;
+        }
+        .letter {
+            float: right;
+            margin: 15px 10px 15px 10px;
+        }
+    </style>
+    <script src="<?= SITE_URL ?>/admin/assets/jquery-3.6.0.min.js"></script>
+    <script src="<?= SITE_URL ?>/admin/assets/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="<?= SITE_URL ?>/admin/assets/tinymce-jquery.min.js"></script>
 <main class="row">
     <div class="ml-sm-auto col-md-9 col-lg-10 my-3 text-white">
         <div class="my-5">
@@ -88,7 +84,7 @@ if (isset($_POST['inspiration_quote_submit'])) {
                             <?= $inspirationQuote['inspiration_quote'] ?? '' ?>
                         </textarea>
                     </div>
-                    <!--Inspiration date input-->
+                    <!--                    Inspiration date input-->
                     <div>
                         <label for="date">Date</label>
                         <input class="form-control" id="date" type="date" name="date" value="<?= $inspirationQuote['date'] ?? '' ?>">
@@ -107,10 +103,9 @@ if (isset($_POST['inspiration_quote_submit'])) {
 <script>
     tinymce.init({
         selector: '#inspiration-quote',
-        toolbar: 'paste',
         height: 600,
         plugins: [
-            'advlist', 'autolink', 'lists', 'image', 'charmap', 'preview',
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
             'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
             'insertdatetime', 'media', 'table', 'help', 'wordcount', 'autoresize',
             'autosave', 'codesample', 'directionality', 'emoticons', 'importcss',

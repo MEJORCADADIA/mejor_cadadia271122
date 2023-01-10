@@ -1,13 +1,12 @@
 <?php require_once "inc/header.php"; ?>
 
 <?php
-$interests = $common->select('interests');
-$interests = $db->get($interests);
+$interests = $common->get('interests');
 
 if (isset($_POST['interest_delete']) && isset($_POST['id']) && !empty($_POST['id'])) {
     $id = $fm->validation($_POST['id']);
     try {
-        $data = $common->delete('interests', "id=$id");
+        $data = $common->delete('interests', "id = :id", ['id' => $id]);
         Session::set('success', 'Interest deleted successfully');
     } catch (Exception $e) {
         Session::set('success', 'Something went wrong. Please try again later.');

@@ -169,7 +169,7 @@ require_once "inc/inspirationQuote.php";
         @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 
         .quote-text {
-            /* font-family: 'Ubuntu', sans-serif; */
+            font-family: 'Ubuntu', sans-serif;
             font-size: 1.2rem;
         }
     </style>
@@ -178,7 +178,7 @@ require_once "inc/inspirationQuote.php";
     $inspirationQuote = getInspirationQuote();
     if (!empty($inspirationQuote)) :
     ?>
-        <div class="navbar px-3 py-2 quote-text d-flex justify-content-center text-white bg-dark text-center">
+        <div class="navbar px-3 py-2 quote-text d-flex justify-content-center text-white bg-dark">
             <?= htmlspecialchars_decode($inspirationQuote) ?>
         </div>
     <?php endif; ?>

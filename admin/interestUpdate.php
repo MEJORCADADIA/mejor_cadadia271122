@@ -12,7 +12,7 @@ $id = $fm->validation($_GET['id']);
 if (isset($_POST['update_interest']) && !empty($_POST['interest'])) {
     $interest = $fm->validation($_POST['interest']);
     try {
-        $common->update('interests', "interest='$interest'", "id=$id");
+        $common->update('interests', ["interest" => $interest], "id = :id", ['id' => $id]);
         Session::set('success', 'Interest updated successfully');
     } catch (Exception $e) {
         Session::set('error', 'Something went wrong. Please try again later');
@@ -22,8 +22,7 @@ if (isset($_POST['update_interest']) && !empty($_POST['interest'])) {
     return;
 }
 
-$interest = $common->select('interests', "id=$id");
-$interest = $db->first($interest);
+$interest = $common->first('interests', "id = :id", ['id' => $id]);
 ?>
 
 <main class="col-md-9 ml-sm-auto col-lg-10 my-3">

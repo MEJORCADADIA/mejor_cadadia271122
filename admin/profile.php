@@ -3,7 +3,7 @@
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_email_update'])) {
 	$email = $fm->validation($_POST['email']);
 	if(!empty($email)) {
-		$email_change = $common->update("`admin`", "`email` = '$email'", "`id` = '$admin_id'");
+		$email_change = $common->update(table: "admin", data: ["email" => $email], cond: "id = :id", params: ['id' => $admin_id], modifiedColumnName: 'updated_at');
 		if ($email_change) {
 			$email_error = '<div class="alert alert-success">Email update successfully.</div>';
 		} else {
@@ -15,14 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_email_update']))
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_password_update'])) {
-	$old_password = $_POST['old_password'];
-	$new_password = $_POST['new_password'];
-	$confirm_password = $_POST['confirm_password'];
-	
-	$password_check = $common->select("`admin`", "`password` = '$old_password' && `id` = '$admin_id'");
-	if ($password_check) {
+	$old_password = $fm->validation($_POST['old_password']);
+	$new_password = $fm->validation($_POST['new_password']);
+	$confirm_password = $fm->validation($_POST['confirm_password']);
+
+	if (password_verify($old_password, $admin_infos['password'])) {
 		if ($new_password == $confirm_password) {
-			$password_change = $common->update("`admin`", "`password` = '$new_password'", "`id` = '$admin_id'");
+            $hashedPassword = password_hash($new_password, PASSWORD_DEFAULT);
+			$password_change = $common->update(table: "admin", data: ["password" => $hashedPassword], cond: "id = :id", params: ['id' => $admin_id], modifiedColumnName: 'updated_at');
 			if ($password_change) {
               	Session::adminDestroy();
 				$confirm_password_error = '<div class="alert alert-success">Password update successfully.</div>';

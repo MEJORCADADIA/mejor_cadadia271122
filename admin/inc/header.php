@@ -5,17 +5,17 @@ include_once($filepath . '/../../lib/Database.php');
 include_once($filepath . '/../../lib/Session.php');
 include_once($filepath . '/../../helper/Format.php');
 include_once($filepath . '/../../classes/Common.php');
-Session::adminSession();
+if (! Session::adminSession()) {
+    header("Location: " . SITE_URL . "/admin/login.php");
+    return;
+}
 $db = new Database();
 $fm = new Format();
 $common = new Common();
 
 if (Session::get('admin_id') !== NULL) {
     $admin_id = Session::get('admin_id');
-    $admin_info = $common->select("`admin`", "`id` = '$admin_id'");
-    if ($admin_info) {
-        $admin_infos = mysqli_fetch_assoc($admin_info);
-    }
+    $admin_infos = $common->first("admin", "id = :id", ['id' => $admin_id]);
 }
 
 if (isset($_GET['admin_logout'])) {

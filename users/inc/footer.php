@@ -10,7 +10,7 @@ require_once "../inc/inspirationQuote.php";
             color: #fef200;
             text-align: center;
             margin: 0px;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .footertitleleft {
@@ -132,6 +132,40 @@ require_once "../inc/inspirationQuote.php";
     }
 </style>
 <div class="clearfix" style="float:none; clear:both;"></div>
+<nav class="navbar d-block d-md-none m-0 p-0">
+    <div class="bg-primary d-flex flex-wrap justify-content-between px-1 py-1">
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1" href="cronovida.php">CronoVida</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1" href="dailygoals.php">Victoria7</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1" href="dailycommitments.php">Guerrero Diario</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1 <?= $goalType == 'weekly' ? ' active' : ''; ?>" href="<?= SITE_URL; ?>/users/supergoals.php">Semanal</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1 <?= $goalType == 'monthly' ? ' active' : ''; ?>" href="<?= SITE_URL; ?>/users/supergoals.php?type=monthly">Mensual</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1 <?= $goalType == 'quarterly' ? ' active' : ''; ?>" href="<?= SITE_URL; ?>/users/supergoals.php?type=quarterly">Trimestral</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1 <?= $goalType == 'yearly' ? ' active' : ''; ?>" href="<?= SITE_URL; ?>/users/supergoals.php?type=yearly">Anual</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1 <?= $goalType == 'lifetime' ? ' active' : ''; ?>" href="<?= SITE_URL; ?>/users/supergoals.php?type=lifetime">De por Vida</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1 <?= $path == 'index.php' ? ' active' : ''; ?>" href="<?= SITE_URL; ?>/users/index.php" id="navbarDropdown">Tablero</a>
+        </div>
+        <div class="py-1">
+            <a class="text-decoration-none text-white px-1 py-1" href="<?= SITE_URL; ?>/users/notebook.php">Escribe Carta</a>
+        </div>
+    </div>
+</nav>
 <!-- Inspiration Quote Capsule Start -->
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
@@ -139,6 +173,7 @@ require_once "../inc/inspirationQuote.php";
     .quote-text {
         font-family: 'Ubuntu', sans-serif;
         font-size: 1.2rem;
+        text-align: center;
     }
 </style>
 
@@ -166,9 +201,13 @@ if (!empty($inspirationQuote)) :
 </script>
 <script src="<?= SITE_URL; ?>/users/assets/bootstrap-datepicker.min.js"></script>
 
-
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
+<?php
+if (!$user_infos) :
+?>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+<?php
+endif;
+?>
 </body>
 
 </html>

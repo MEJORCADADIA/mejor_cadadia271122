@@ -2,19 +2,19 @@
 <?php
 if(isset($_GET['block'])) {
   $block_id = $_GET['block'];
-  $block_update = $common->update("`users`", "`status` = '0'", "`id` = '$block_id'");
+  $block_update = $common->update(table: "users", data: ["status" => '0'], cond: "id = :id", params: ['id' => $block_id], modifiedColumnName: 'updated_at');
   if($block_update) {
     header("Location: ".SITE_URL."/admin");
   }
 } elseif(isset($_GET['unblock'])) {
   $unblock_id = $_GET['unblock'];
-  $unblock_update = $common->update("`users`", "`status` = '1'", "`id` = '$unblock_id'");
+  $unblock_update = $common->update(table: "users", data: ["status" => '1'], cond: "id = :id", params: ['id' => $unblock_id], modifiedColumnName: 'updated_at');
   if($unblock_update) {
     header("Location: ".SITE_URL."/admin");
   }
 } elseif(isset($_GET['delete'])) {
   $delete_id = $_GET['delete'];
-  $user_delete = $common->delete("`users`", "`id` = '$delete_id'");
+  $user_delete = $common->delete("`users`", "id = :id", ['id' =>$delete_id]);
   if($user_delete) {
     header("Location: ".SITE_URL."/admin");
   }
@@ -38,9 +38,9 @@ if(isset($_GET['block'])) {
               </tr>
             </thead>
             <?php
-            $all_users = $common->select("`users`");
+            $all_users = $common->get("`users`");
             if($all_users) {
-              while($all_user = mysqli_fetch_assoc($all_users)) {
+              foreach($all_users as $all_user) {
             ?>
             <tr>
               <td>
@@ -74,15 +74,15 @@ if(isset($_GET['block'])) {
                 <?php
                 if($all_user['status'] == 1) {
                 ?>
-                <a href="https://mejorcadadia.com/admin/users?block=<?= $all_user['id']; ?>" class="btn btn-info" onclick="return confirm('Are you sure to block?');">Block</a>
+                <a href="<?= SITE_URL ?>/admin/users?block=<?= $all_user['id']; ?>" class="btn btn-info" onclick="return confirm('Are you sure to block?');">Block</a>
                 <?php
                 } else {
                 ?>
-                <a href="https://mejorcadadia.com/admin/users?unblock=<?= $all_user['id']; ?>" class="btn btn-success" onclick="return confirm('Are you sure to unblock?');">Unblock</a>
+                <a href="<?= SITE_URL ?>/admin/users?unblock=<?= $all_user['id']; ?>" class="btn btn-success" onclick="return confirm('Are you sure to unblock?');">Unblock</a>
                 <?php
                 }
                 ?>
-                <a href="https://mejorcadadia.com/admin/users?delete=<?= $all_user['id']; ?>" onclick="return confirm('Are you sure to delete?');" class="btn btn-danger ms-2">Delete</a>
+                <a href="<?= SITE_URL ?>/admin/users?delete=<?= $all_user['id']; ?>" onclick="return confirm('Are you sure to delete?');" class="btn btn-danger ms-2">Delete</a>
               </td>
             </tr>
             <?php

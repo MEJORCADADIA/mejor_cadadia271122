@@ -2,42 +2,29 @@
 <?php
 if(isset($_GET['block'])) {
   $block_id = $_GET['block'];
-  $block_update = $common->update("`users`", "`status` = '0'", "`id` = '$block_id'");
+  $block_update = $common->update(table: "users", data: ["status" => '0'], cond: "id = :id", params: ['id' => $block_id], modifiedColumnName: 'updated_at');
   if($block_update) {
     header("Location: ".SITE_URL."/admin");
   }
 } elseif(isset($_GET['unblock'])) {
   $unblock_id = $_GET['unblock'];
-  $unblock_update = $common->update("`users`", "`status` = '1'", "`id` = '$unblock_id'");
+  $unblock_update = $common->update(table: "`users`", data: ["status" => '1'], cond: "id = :id", params: ['id' => $unblock_id], modifiedColumnName: 'updated_at');
   if($unblock_update) {
     header("Location: ".SITE_URL."/admin");
   }
 } elseif(isset($_GET['delete'])) {
   $delete_id = $_GET['delete'];
-  $user_delete = $common->delete("`users`", "`id` = '$delete_id'");
+  $user_delete = $common->delete("`users`", "`id` = :id", ['id' => $delete_id]);
   if($user_delete) {
     header("Location: ".SITE_URL."/admin");
   }
 }
 
-  $total_user = $common->select("`users`");
-  if($total_user) {
-  	$total_users = mysqli_num_rows($total_user);
-  } else {
-  	$total_users = 0;
-  }
-  $active_user = $common->select("`users`", "`status` = '1'");
-  if($active_user) {
-  	$active_users = mysqli_num_rows($active_user);
-  } else {
-  	$active_users = 0;
-  }
-  $blocked_user = $common->select("`users`", "`status` = '0'");
-  if($blocked_user) {
-  	$blocked_users = mysqli_num_rows($blocked_user);
-  } else {
-  	$blocked_users = 0;
-  }
+  $total_users = $common->count("users");
+
+  $active_users = $common->count("users", "status = :status", ['status' => '1']);
+
+  $blocked_users = $common->count("`users`", "`status` = :status", ['status' => '0']);
 ?>
     <main role="main" class="col-md-9 ml-sm-auto col-lg-10 my-3">
       <div class="projects mb-4">

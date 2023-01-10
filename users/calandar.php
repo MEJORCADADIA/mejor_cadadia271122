@@ -48,20 +48,24 @@ $ym = date('Y-m',strtotime($selectedDate));
 <?php endif; ?>
 <?php
 
-$user_id = Session::get('user_id');
+$user_id = $user_infos['id'];
 $answers=[];
 for ($i=0; $i < 32; $i++) { 
   $answers[$i]=0;
 }
 $goalDescription='';
-$result=$common->db->select("SELECT * FROM daily_commitments_goals WHERE user_id='".$user_id."' AND id='".$goalId."'");
-if($result){
-  $row = $result -> fetch_assoc();
+$row = $common->first("daily_commitments_goals", 'user_id = :user_id AND id = :id', ['user_id' => $user_id, 'id' => $goalId]);
+if($row){
   $goalDescription=$row['goal'];
 }
-$resultAns=$common->db->select("SELECT answer, DAY(created_at) as d FROM daily_commitments_answers WHERE user_id='".$user_id."' AND goal_id='".$goalId."' AND MONTH(created_at)='".$selectedMonth."'");
-if($resultAns && $resultAns->num_rows>0){
-  while ($row = $resultAns -> fetch_assoc()) {
+$resultAns=$common->get(
+        'daily_commitments_answers',
+        'user_id = :user_id AND goal_id = :goal_id AND MONTH(created_at) = :month',
+        ['user_id' => $user_id, 'goal_id' => $goalId, 'month' => $selectedMonth],
+        ['answer', 'DAY(created_at) as d']
+);
+if($resultAns && count($resultAns) > 0){
+  foreach ($resultAns as $row) {
     $answers[$row['d']]=$row['answer'];    
   }     
 }

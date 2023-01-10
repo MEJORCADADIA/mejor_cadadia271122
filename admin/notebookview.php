@@ -37,17 +37,15 @@
               </tr>
             </thead>
             <?php
-            $all_letterapplication = $common->select("`letterapplication`");
-            if($all_letterapplication) {
-              while($all_letterapp = mysqli_fetch_assoc($all_letterapplication)) {
-                $useridcheck = $all_letterapp['UserId'];
+            $all_letterApplication = $common->get("`letterapplication`");
+            if($all_letterApplication) {
+              foreach($all_letterApplication as $all_letterApp) {
+                $userIdCheck = $all_letterApp['UserId'];
                
-                $letterusercheck = $common->selectcolumn("COUNT(id) AS id","`users`","id = ".$useridcheck."");
-                $letteruser_appcheck = mysqli_fetch_assoc($letterusercheck);
-                if($letteruser_appcheck['id'] >= 1) {
-                  $letteruser = $common->select("`users`","id = ".$useridcheck."");
-                  $letteruser_app = mysqli_fetch_assoc($letteruser);
-                  $letteruser_appview = $letteruser_app['full_name'];
+                $letterUserCheck = $common->count('users', 'id = :id', ['id' => $userIdCheck]);
+                if($letterUserCheck >= 1) {
+                    $letterUserApp = $common->first("`users`","id = :id", ['id' => $userIdCheck]);
+                    $letteruser_appview = $letterUserApp['full_name'];
                 } 
                 else {
                   $letteruser_appview= 'Unknown';
@@ -64,21 +62,21 @@
                 <p><?php //echo $all_letterapp['emailto']; ?></p>
               </td> -->
               <td>
-                <p><?= $all_letterapp['date']; ?></p>
+                <p><?= $all_letterApp['date']; ?></p>
               </td>
               <td>
-                <p><?= $all_letterapp['title']; ?></p>
+                <p><?= $all_letterApp['title']; ?></p>
               </td>
               <td>
-                <textarea class="LetterApplication" id="LetterApplication<?= $all_letterapp['id']; ?>" name="LetterApplication"><?= $all_letterapp['letterapplicationtext']; ?></textarea>
+                <textarea class="LetterApplication" id="LetterApplication<?= $all_letterApp['id']; ?>" name="LetterApplication"><?= $all_letterApp['letterapplicationtext']; ?></textarea>
               </td>
               <td>
                   <p><?= $letteruser_appview; ?></p>
               </td>
               <td class="text-center">
-                <a id="Save" onclick="SaveOnClick(<?= $all_letterapp['id']; ?>)" class="btn btn-primary">Save</a>
-                <a id="Edit" onclick="EditOnClick(<?= $all_letterapp['id']; ?>)" class="btn btn-info">Edit</a>
-                <a id="Delete" onclick="DeleteOnClick(<?= $all_letterapp['id']; ?>)" class="btn btn-danger ms-2">Delete</a>
+                <a id="Save" onclick="SaveOnClick(<?= $all_letterApp['id']; ?>)" class="btn btn-primary">Save</a>
+                <a id="Edit" onclick="EditOnClick(<?= $all_letterApp['id']; ?>)" class="btn btn-info">Edit</a>
+                <a id="Delete" onclick="DeleteOnClick(<?= $all_letterApp['id']; ?>)" class="btn btn-danger ms-2">Delete</a>
               </td>
             </tr>
             <?php
@@ -125,7 +123,7 @@
       function SaveOnClick(id) {
         var LetterApplication = tinyMCE.get('LetterApplication'+id).getContent()
         $.ajax({
-            url: "https://mejorcadadia.com/admin/ajax/ajax.php",
+            url: "<?= SITE_URL ?>/admin/ajax/ajax.php",
             type: "POST",
             data: {
                 SaveIdCheck: 'SaveIdCheck',
@@ -159,7 +157,7 @@
       function EditOnClick(id) {
         var LetterApplication = tinyMCE.get('LetterApplication'+id).getContent()
         $.ajax({
-            url: "https://mejorcadadia.com/admin/ajax/ajax.php",
+            url: "<?= SITE_URL ?>/admin/ajax/ajax.php",
             type: "POST",
             data: {
                 EmailIdCheck: 'EmailIdCheck',
@@ -192,7 +190,7 @@
 
       function DeleteOnClick(id) {
         $.ajax({
-            url: "https://mejorcadadia.com/admin/ajax/ajax.php",
+            url: "<?= SITE_URL ?>/admin/ajax/ajax.php",
             type: "POST",
             data: {
                 EmailDeleteCheck: 'EmailDeleteCheck',

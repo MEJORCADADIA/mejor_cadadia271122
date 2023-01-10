@@ -4,8 +4,7 @@ require_once "inc/questions.php";
 ?>
 
 <?php
-$userInterests = $db->select("select i.id, i.interest from interest_user inner join interests as i on interest_user.interest_id=i.id where user_id = {$user_infos['id']}");
-$userInterests = $db->get($userInterests);
+$userInterests = $common->get("interest_user inner join interests as i on interest_user.interest_id=i.id",  'user_id = :user_id', ['user_id' => $user_infos['id']], ['i.id', 'i.interest']);
 
 if ($user_infos['answers']) {
     $answers = json_decode($user_infos['answers']);

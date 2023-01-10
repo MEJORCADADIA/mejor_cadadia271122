@@ -5,7 +5,7 @@ class Session
 	public static function init()
 	{
 		if (session_status() == PHP_SESSION_NONE) {
-			$lifetime = 6000;
+			$lifetime = 3600*24*30;
 			session_set_cookie_params($lifetime);
 			session_start();
 		}
@@ -24,14 +24,19 @@ class Session
 			return false;
 		}
 	}
+
 	public static function checkSession()
 	{
-
 		self::init();
 		if (self::get('login') == false) {
-			header("Location: " . SITE_URL);
+            session_destroy();
+
+            return false;
 		}
+
+        return true;
 	}
+
 	public static function checkLogin()
 	{
 		self::init();
@@ -39,6 +44,7 @@ class Session
 			header("Location: " . SITE_URL . "/users/index.php");
 		}
 	}
+
 	public static function destroy()
 	{
 		session_destroy();
@@ -49,11 +55,14 @@ class Session
 	{
 		self::init();
 		if (self::get('admin_login') == false) {
-
 			session_destroy();
-			header("Location: " . SITE_URL . "/admin/login.php");
+
+			return false;
 		}
+
+        return true;
 	}
+
 	public static function adminLogin()
 	{
 		self::init();
@@ -61,6 +70,7 @@ class Session
 			header("Location: " . SITE_URL . "/admin/index.php");
 		}
 	}
+
 	public static function adminDestroy()
 	{
 
@@ -78,12 +88,14 @@ class Session
 	{
 		return Session::get('success') ? true : false;
 	}
+
 	public static function getSuccess()
 	{
 		$message = Session::get('success') ?: null;
 		Session::unset('success');
 		return $message;
 	}
+
 	public static function hasError()
 	{
 		return Session::get('error') ? true : false;
